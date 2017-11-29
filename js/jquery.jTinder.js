@@ -12,11 +12,13 @@
 		defaults = {
 			onDislike: null,
 			onLike: null,
+			onFinish: null,
 			animationRevertSpeed: 200,
 			animationSpeed: 400,
 			threshold: 1,
 			likeSelector: '.like',
-			dislikeSelector: '.dislike'
+			dislikeSelector: '.dislike',
+			likeAllButtonSelector: '.like-all'
 		};
 
 	var container = null;
@@ -50,6 +52,20 @@
 			$(element).bind('touchstart mousedown', this.handler);
 			$(element).bind('touchmove mousemove', this.handler);
 			$(element).bind('touchend mouseup', this.handler);
+			var time = 0;
+			var panes_count = current_pane;
+
+			$('.like-all').on('click', function() {
+				panes.each(function(index) {
+					var pa = panes.eq(panes_count - index );
+					setTimeout(function() {
+						pa.animate({"transform": "translate(" + (pane_width) + "px," + (pane_width*-1.5) + "px) rotate(60deg)"}, $that.settings.animationSpeed);
+						if($that.settings.onLike) {
+							$that.settings.onLike(pa);
+						}
+					}, time += $that.settings.animationSpeed / 4);
+				});
+			});
 		},
 
 		showPane: function (index) {
@@ -157,6 +173,11 @@
 						panes.eq(current_pane).find($that.settings.likeSelector).animate({"opacity": 0}, $that.settings.animationRevertSpeed);
 						panes.eq(current_pane).find($that.settings.dislikeSelector).animate({"opacity": 0}, $that.settings.animationRevertSpeed);
 					}
+
+					if (current_pane == 0 && $that.settings.onFinish) {
+						$that.settings.onFinish();
+					}
+
 					break;
 			}
 		}
